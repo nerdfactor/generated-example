@@ -6,7 +6,7 @@ import eu.nerdfactor.springutil.generatedrest.annotation.IdAccessor;
 import eu.nerdfactor.springutil.generatedrest.annotation.RelationAccessor;
 import eu.nerdfactor.springutil.generatedrest.config.AccessorType;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.List;
 
 /**

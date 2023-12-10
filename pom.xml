@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.7.3</version>
+		<version>3.2.0</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>eu.nerdfactor.springutil</groupId>
@@ -42,10 +42,11 @@
 
 		<!-- JPA Filtering -->
 		<dependency>
-			<groupId>com.turkraft</groupId>
-			<artifactId>spring-filter</artifactId>
-			<version>2.1.1</version>
+			<groupId>com.turkraft.springfilter</groupId>
+			<artifactId>jpa</artifactId>
+			<version>3.1.6</version>
 		</dependency>
+
 
 		<!-- Dto Mapping -->
 		<dependency>
@@ -57,7 +58,7 @@
 		<dependency>
 			<groupId>eu.nerdfactor.springutil</groupId>
 			<artifactId>generated-rest</artifactId>
-			<version>0.0.5</version>
+			<version>0.0.8</version>
 		</dependency>
 		<dependency>
 			<groupId>com.squareup</groupId>

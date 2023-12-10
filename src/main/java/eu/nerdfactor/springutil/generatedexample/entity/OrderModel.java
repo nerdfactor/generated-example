@@ -3,7 +3,7 @@ package eu.nerdfactor.springutil.generatedexample.entity;
 import eu.nerdfactor.springutil.generatedexample.customer.CustomerDao;
 import eu.nerdfactor.springutil.generatedrest.annotation.Relation;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
 

@@ -23,11 +23,9 @@ import java.util.Optional;
 public interface ProductRepository extends PagingAndSortingRepository<ProductEntity, Integer> {
 
 	@NotNull
-	@Override
 	@Secured("ROLE_READ_PRODUCT")
 	Optional<ProductEntity> findById(@NotNull Integer id);
 
-	@Override
 	@Secured("ROLE_READ_PRODUCT")
 	boolean existsById(@NotNull Integer id);
 
@@ -42,15 +40,12 @@ public interface ProductRepository extends PagingAndSortingRepository<ProductEnt
 	Page<ProductEntity> findAll(@NotNull Pageable pageable);
 
 	@NotNull
-	@Override
 	@Secured("ROLE_UPDATE_PRODUCT")
 	<S extends ProductEntity> S save(@NotNull S entity);
 
-	@Override
 	@Secured("ROLE_DELETE_PRODUCT")
 	void deleteById(@NotNull Integer id);
 
-	@Override
 	@Secured("ROLE_DELETE_PRODUCT")
 	void delete(@NotNull ProductEntity entity);
 }

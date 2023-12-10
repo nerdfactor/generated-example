@@ -4,7 +4,7 @@ import eu.nerdfactor.springutil.generatedexample.dto.ProductDto;
 import eu.nerdfactor.springutil.generatedrest.annotation.Relation;
 import eu.nerdfactor.springutil.generatedrest.data.PersistentEntity;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
