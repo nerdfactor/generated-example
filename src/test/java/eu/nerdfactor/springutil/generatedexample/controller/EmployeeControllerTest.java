@@ -1,82 +1,83 @@
 package eu.nerdfactor.springutil.generatedexample.controller;
 
-import eu.nerdfactor.springutil.generatedexample.config.RestConfig;
-import eu.nerdfactor.springutil.generatedexample.config.RestPage;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.nerdfactor.springutil.generatedexample.customer.CustomerDao;
 import eu.nerdfactor.springutil.generatedexample.entity.Employee;
 import eu.nerdfactor.springutil.generatedexample.repository.EmployeeRepository;
+import eu.nerdfactor.springutil.generatedrest.data.DataPage;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.StreamSupport;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(SpringExtension.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class EmployeeControllerTest {
+@SpringBootTest
+@AutoConfigureMockMvc
+class EmployeeControllerTest {
 
-	@LocalServerPort
-	private int port;
+	private static final String API_PATH = "/api/employee";
 
 	@Autowired
-	RestTemplate restTemplate;
+	MockMvc mockMvc;
+
+	@Autowired
+	ObjectMapper jsonMapper;
 
 	@Autowired
 	EmployeeRepository repository;
 
 	@Test
-	public void shouldLoadExistingEmployee() {
+	@WithMockUser(roles = "READ_EMPLOYEE")
+	void shouldLoadExistingEmployee() throws Exception {
 		Employee employee = new Employee();
 		employee.setPerNo(12345);
 		employee.setName("Jonathan Pym");
 		employee = this.repository.save(employee);
-		HttpEntity<Employee> response = this.restTemplate.getForEntity(
-				"http://localhost:" + this.port + "/api/employee/" + employee.getPerNo(),
-				Employee.class);
-		assertNotNull(response.getBody());
-		assertEquals(employee.getPerNo(), response.getBody().getPerNo());
-		assertEquals(employee.getName(), response.getBody().getName());
+		mockMvc.perform(get(API_PATH + "/" + employee.getPerNo()))
+				.andExpect(status().isOk())
+				.andExpect(content().json(jsonMapper.writeValueAsString(employee)));
 	}
 
 	@Test
-	public void shouldReturn404ErrorLoadingNotExistingEmployee() {
-		assertThrows(HttpClientErrorException.NotFound.class, () -> {
-			HttpEntity<Employee> response = this.restTemplate.getForEntity(
-					"http://localhost:" + this.port + "/api/employee/23456",
-					Employee.class);
-		});
+	@WithMockUser(roles = "READ_EMPLOYEE")
+	void shouldReturn404ErrorLoadingNotExistingEmployee() throws Exception {
+		mockMvc.perform(get(API_PATH + "/123456"))
+				.andExpect(result -> assertInstanceOf(EntityNotFoundException.class, result.getResolvedException()))
+				.andExpect(status().is(HttpStatus.NOT_FOUND.value()));
 	}
 
 	@Test
-	public void shouldCreateNewEmployee() {
+	@WithMockUser(roles = "CREATE_EMPLOYEE")
+	void shouldCreateNewEmployee() throws Exception {
 		Employee employee = new Employee();
 		employee.setPerNo(34567);
 		employee.setName("Janet van Dyne");
-		HttpEntity<Employee> response = this.restTemplate.postForEntity(
-				"http://localhost:" + this.port + "/api/employee/",
-				new HttpEntity<>(employee, RestConfig.withHeaders()),
-				Employee.class);
-		assertNotNull(response.getBody());
+		mockMvc.perform(post(API_PATH)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(this.jsonMapper.writeValueAsString(employee))
+		).andExpect(status().isOk());
 		Employee employeeCheck = this.repository.findById(employee.getPerNo()).orElse(null);
 		assertNotNull(employeeCheck);
 		assertEquals(employee.getName(), employeeCheck.getName());
 	}
 
 	@Test
-	public void shouldSetExistingEmployee() {
+	@WithMockUser(roles = "UPDATE_EMPLOYEE")
+	void shouldSetExistingEmployee() throws Exception {
 		Employee employee1 = new Employee();
 		employee1.setPerNo(45678);
 		employee1.setName("Tony Stark");
@@ -86,9 +87,10 @@ public class EmployeeControllerTest {
 		employee2.setPerNo(employee1.getPerNo());
 		employee2.setName("Bruce Banner");
 		employee1.setEmail("hulk@example.com");
-		this.restTemplate.put(
-				"http://localhost:" + this.port + "/api/employee/" + employee1.getPerNo(),
-				new HttpEntity<>(employee2, RestConfig.withHeaders()));
+		mockMvc.perform(put(API_PATH + "/" + employee1.getPerNo())
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(this.jsonMapper.writeValueAsString(employee2))
+		).andExpect(status().isOk());
 		Employee employeeCheck = this.repository.findById(employee1.getPerNo()).orElse(null);
 		assertNotNull(employeeCheck);
 		assertEquals(employee2.getName(), employeeCheck.getName());
@@ -96,7 +98,8 @@ public class EmployeeControllerTest {
 	}
 
 	@Test
-	public void shouldUpdateExistingEmployee() {
+	@WithMockUser(roles = "UPDATE_EMPLOYEE")
+	void shouldUpdateExistingEmployee() throws Exception {
 		Employee employee1 = new Employee();
 		employee1.setPerNo(56789);
 		employee1.setName("Steven Rogers");
@@ -105,10 +108,10 @@ public class EmployeeControllerTest {
 		Employee employee2 = new Employee();
 		employee2.setPerNo(employee1.getPerNo());
 		employee2.setName("Carol Danvers");
-		Employee response = this.restTemplate.patchForObject(
-				"http://localhost:" + this.port + "/api/employee/" + employee1.getPerNo(),
-				new HttpEntity<>(employee2, RestConfig.withHeaders()),
-				Employee.class);
+		mockMvc.perform(patch(API_PATH + "/" + employee1.getPerNo())
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(this.jsonMapper.writeValueAsString(employee2))
+		).andExpect(status().isOk());
 		Employee employeeCheck = this.repository.findById(employee1.getPerNo()).orElse(null);
 		assertNotNull(employeeCheck);
 		assertEquals(employee2.getName(), employeeCheck.getName());
@@ -116,18 +119,21 @@ public class EmployeeControllerTest {
 	}
 
 	@Test
-	public void shouldDeleteExistingEmployee() {
+	@WithMockUser(roles = "DELETE_EMPLOYEE")
+	void shouldDeleteExistingEmployee() throws Exception {
 		Employee employee = new Employee();
 		employee.setPerNo(67890);
 		employee.setName("Clinton Barton");
 		employee = this.repository.save(employee);
-		this.restTemplate.delete("http://localhost:" + this.port + "/api/employee/" + employee.getPerNo());
+		mockMvc.perform(delete(API_PATH + "/" + employee.getPerNo()))
+				.andExpect(status().is(HttpStatus.NO_CONTENT.value()));
 		Employee employeeCheck = this.repository.findById(employee.getPerNo()).orElse(null);
 		assertNull(employeeCheck);
 	}
 
 	@Test
-	public void shouldLoadExistingEmployeeList() {
+	@WithMockUser(roles = "READ_EMPLOYEE")
+	void shouldLoadExistingEmployeeList() throws Exception {
 		long count = StreamSupport.stream(this.repository.findAll().spliterator(), false).count();
 		Employee employee1 = new Employee();
 		employee1.setPerNo(78901);
@@ -141,14 +147,14 @@ public class EmployeeControllerTest {
 		employee3.setPerNo(90123);
 		employee3.setName("America Chavez");        // alphabetically first
 		employee3 = this.repository.save(employee3);
-		HttpEntity<Employee[]> response = this.restTemplate.getForEntity(
-				"http://localhost:" + this.port + "/api/employee",
-				Employee[].class);
-		assertNotNull(response.getBody());
-		assertEquals(3 + count, response.getBody().length);
-		List<Employee> orderedList = Arrays.asList(response.getBody());
-		orderedList.sort(Comparator.comparing(Employee::getName));
-		assertEquals(employee3.getPerNo(), orderedList.get(0).getPerNo());
+		String json = mockMvc.perform(get(API_PATH))
+				.andExpect(status().isOk())
+				.andReturn().getResponse().getContentAsString();
+		List<Employee> response = this.jsonMapper.readValue(json, new TypeReference<>() {
+		});
+		assertEquals(3 + count, response.size());
+		response.sort(Comparator.comparing(Employee::getName));
+		assertEquals(employee3.getPerNo(), response.get(0).getPerNo());
 	}
 
 	/**
@@ -157,7 +163,8 @@ public class EmployeeControllerTest {
 	 * paging.
 	 */
 	@Test
-	public void shouldLoadExistingEmployeeListAndIgnorePaging() {
+	@WithMockUser(roles = "READ_EMPLOYEE")
+	void shouldLoadExistingEmployeeListAndIgnorePaging() throws Exception {
 		long count = StreamSupport.stream(this.repository.findAll().spliterator(), false).count();
 		Employee employee1 = new Employee();
 		employee1.setPerNo(98765);
@@ -171,12 +178,16 @@ public class EmployeeControllerTest {
 		employee3.setPerNo(76543);
 		employee3.setName("Robert Drake");
 		employee3 = this.repository.save(employee3);
-		HttpEntity<RestPage<Employee>> response = this.restTemplate.exchange(
-				"http://localhost:" + this.port + "/api/employee/search?page=1&size=1", HttpMethod.GET, null,
-				new ParameterizedTypeReference<>() {
-				});
-		assertNotNull(response.getBody());
-		assertEquals(3 + count, response.getBody().getTotalElements());
-		assertEquals(3 + count, response.getBody().getContent().size());
+
+		String response = mockMvc.perform(get(API_PATH + "/search?page=1&size=1"))
+				.andExpect(status().isOk())
+				.andReturn().getResponse().getContentAsString();
+
+		DataPage<CustomerDao> responses = this.jsonMapper.readValue(response, new TypeReference<>() {
+		});
+
+		assertNotNull(responses);
+		assertEquals(count + 3, responses.getTotalElements());
+		assertEquals(count + 3, responses.getContent().size());
 	}
 }

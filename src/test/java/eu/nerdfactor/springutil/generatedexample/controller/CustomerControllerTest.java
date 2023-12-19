@@ -1,48 +1,50 @@
 package eu.nerdfactor.springutil.generatedexample.controller;
 
-import eu.nerdfactor.springutil.generatedexample.config.RestPage;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.nerdfactor.springutil.generatedexample.customer.CustomerDao;
-import eu.nerdfactor.springutil.generatedexample.customer.CustomerDto;
 import eu.nerdfactor.springutil.generatedexample.customer.CustomerRepository;
+import eu.nerdfactor.springutil.generatedrest.data.DataPage;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.web.servlet.MockMvc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(SpringExtension.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class CustomerControllerTest {
+@SpringBootTest
+@AutoConfigureMockMvc
+class CustomerControllerTest {
 
-	@LocalServerPort
-	private int port;
+	private static final String API_PATH = "/api/customers";
 
 	@Autowired
-	RestTemplate restTemplate;
+	MockMvc mockMvc;
+
+	@Autowired
+	ObjectMapper jsonMapper;
 
 	@Autowired
 	CustomerRepository repository;
 
 	@Test
-	public void shouldLoadExistingCustomer() {
+	@WithMockUser(roles = "READ_CUSTOMER")
+	void shouldLoadExistingCustomer() throws Exception {
 		CustomerDao customer = new CustomerDao();
 		customer.setEmail("peter@example.com");
 		customer.setName("Peter Parker");
 		customer = this.repository.save(customer);
-		HttpEntity<CustomerDto> response = this.restTemplate.getForEntity(
-				"http://localhost:" + this.port + "/api/customers/" + customer.getEmail(),
-				CustomerDto.class);
-		assertNotNull(response.getBody());
-		assertEquals(customer.getEmail(), response.getBody().getEmail());
-		assertEquals(customer.getName(), response.getBody().getName());
+
+		mockMvc.perform(get(API_PATH + "/" + customer.getEmail()))
+				.andExpect(status().isOk())
+				.andExpect(content().json(jsonMapper.writeValueAsString(customer)));
+
 	}
 
 	/**
@@ -52,7 +54,8 @@ public class CustomerControllerTest {
 	 * @see <a href="https://github.com/turkraft/spring-filter">https://github.com/turkraft/spring-filter</a>
 	 */
 	@Test
-	public void shouldLoadExistingCustomerListPagedAndFilteredByName() {
+	@WithMockUser(roles = "READ_CUSTOMER")
+	void shouldLoadExistingCustomerListPagedAndFilteredByName() throws Exception {
 		CustomerDao customer1 = new CustomerDao();
 		customer1.setEmail("pietro@example.com");
 		customer1.setName("Pietro Maximoff");
@@ -69,12 +72,16 @@ public class CustomerControllerTest {
 		customer4.setEmail("vance@example.com");
 		customer4.setName("Vance Astrovik");
 		customer4 = this.repository.save(customer4);
-		HttpEntity<RestPage<CustomerDao>> response = this.restTemplate.exchange(
-				"http://localhost:" + this.port + "/api/customers/search?page=1&size=1&query=name~'%maximoff'", HttpMethod.GET, null,
-				new ParameterizedTypeReference<>() {
-				});
-		assertNotNull(response.getBody());
-		assertEquals(2, response.getBody().getTotalElements());
-		assertEquals(1, response.getBody().getContent().size());
+
+		String response = mockMvc.perform(get(API_PATH + "/search?page=1&size=1&filter=name~~'%maximoff'"))
+				.andExpect(status().isOk())
+				.andReturn().getResponse().getContentAsString();
+
+		DataPage<CustomerDao> responses = this.jsonMapper.readValue(response, new TypeReference<>() {
+		});
+
+		assertNotNull(responses);
+		assertEquals(2, responses.getTotalElements());
+		assertEquals(1, responses.getContent().size());
 	}
 }

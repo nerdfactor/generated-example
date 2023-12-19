@@ -1,51 +1,52 @@
 package eu.nerdfactor.springutil.generatedexample.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.nerdfactor.springutil.generatedexample.dto.OrderDto;
 import eu.nerdfactor.springutil.generatedexample.entity.OrderModel;
 import eu.nerdfactor.springutil.generatedexample.repository.OrderRepository;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.HttpEntity;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(SpringExtension.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class OrderControllerTest {
+@SpringBootTest
+@AutoConfigureMockMvc
+class OrderControllerTest {
 
-	@LocalServerPort
-	private int port;
+	private static final String API_PATH = "/api/orders";
 
 	@Autowired
-	RestTemplate restTemplate;
+	MockMvc mockMvc;
+
+	@Autowired
+	ObjectMapper jsonMapper;
 
 	@Autowired
 	OrderRepository repository;
 
-	@Autowired
-	ModelMapper modelMapper;
-
 	@Test
-	public void loadOrder() {
+	@WithMockUser(roles = {"READ_ORDER"})
+	void loadOrder() throws Exception {
 		LocalDateTime now = LocalDateTime.now();
 		OrderModel order = new OrderModel();
 		order.setOrderedAt(now);
 		order = this.repository.save(order);
-		HttpEntity<OrderDto> response = this.restTemplate.getForEntity(
-				"http://localhost:" + this.port + "/api/orders/" + order.getId(),
-				OrderDto.class);
-		assertNotNull(response.getBody());
-		assertEquals(order.getId(), response.getBody().getId());
+		String json = mockMvc.perform(get(API_PATH + "/" + order.getId()))
+				.andExpect(status().isOk())
+				.andReturn()
+				.getResponse()
+				.getContentAsString();
+		OrderDto response = this.jsonMapper.readValue(json, OrderDto.class);
+		assertEquals(order.getId(), response.getId());
 		// milliseconds will be different after loading from DB, therefor only compare day
-		assertEquals(now.getDayOfMonth(), response.getBody().getOrderedAt().getDayOfMonth());
+		assertEquals(now.getDayOfMonth(), response.getOrderedAt().getDayOfMonth());
 	}
 }
