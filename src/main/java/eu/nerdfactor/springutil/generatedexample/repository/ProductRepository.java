@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Repository;
@@ -20,7 +21,7 @@ import java.util.Optional;
  * repository.
  */
 @Repository
-public interface ProductRepository extends PagingAndSortingRepository<ProductEntity, Integer> {
+public interface ProductRepository extends PagingAndSortingRepository<ProductEntity, Integer>, CrudRepository<ProductEntity, Integer> {
 
 	@NotNull
 	@Secured("ROLE_READ_PRODUCT")

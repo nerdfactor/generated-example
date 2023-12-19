@@ -19,6 +19,6 @@ public class ProductService implements DataAccessService<ProductEntity, Integer>
 
 	@Override
 	public CrudRepository<ProductEntity, Integer> getRepository() {
-		return (CrudRepository)this.repository;
+		return this.repository;
 	}
 }
