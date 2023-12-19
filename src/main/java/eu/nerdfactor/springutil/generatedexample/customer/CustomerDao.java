@@ -1,14 +1,15 @@
 package eu.nerdfactor.springutil.generatedexample.customer;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import eu.nerdfactor.springutil.generatedexample.entity.Employee;
 import eu.nerdfactor.springutil.generatedexample.entity.OrderModel;
 import eu.nerdfactor.springutil.generatedrest.annotation.RelationAccessor;
 import eu.nerdfactor.springutil.generatedrest.config.AccessorType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import java.util.Collection;
 
 /**
@@ -16,6 +17,7 @@ import java.util.Collection;
  * Uses Dao suffix style. Dto will be assumed to be called CustomerDto.
  */
 @Entity
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class CustomerDao {
 
 	@Id

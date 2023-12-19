@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Repository;
@@ -20,14 +21,12 @@ import java.util.Optional;
  * repository.
  */
 @Repository
-public interface ProductRepository extends PagingAndSortingRepository<ProductEntity, Integer> {
+public interface ProductRepository extends PagingAndSortingRepository<ProductEntity, Integer>, CrudRepository<ProductEntity, Integer> {
 
 	@NotNull
-	@Override
 	@Secured("ROLE_READ_PRODUCT")
 	Optional<ProductEntity> findById(@NotNull Integer id);
 
-	@Override
 	@Secured("ROLE_READ_PRODUCT")
 	boolean existsById(@NotNull Integer id);
 
@@ -42,15 +41,12 @@ public interface ProductRepository extends PagingAndSortingRepository<ProductEnt
 	Page<ProductEntity> findAll(@NotNull Pageable pageable);
 
 	@NotNull
-	@Override
 	@Secured("ROLE_UPDATE_PRODUCT")
 	<S extends ProductEntity> S save(@NotNull S entity);
 
-	@Override
 	@Secured("ROLE_DELETE_PRODUCT")
 	void deleteById(@NotNull Integer id);
 
-	@Override
 	@Secured("ROLE_DELETE_PRODUCT")
 	void delete(@NotNull ProductEntity entity);
 }

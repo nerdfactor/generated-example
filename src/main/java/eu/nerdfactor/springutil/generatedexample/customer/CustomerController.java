@@ -8,6 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Base controller for Customers.<br>
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * <br>
  * Uses GeneratedRestSecurity to configure Spring security for the generated controller.
  */
+@RestController
 @GeneratedRestController(value = "/api/customers", entity = CustomerDao.class, id = String.class, dto = CustomerDto.class)
 @GeneratedRestSecurity
 public class CustomerController {
@@ -33,7 +35,7 @@ public class CustomerController {
 	 */
 	@DeleteMapping("/api/customers/{id}")
 	@PreAuthorize("hasRole('ROLE_DELETE_CUSTOMER')")
-	public ResponseEntity<?> delete(@PathVariable final String id) {
+	public ResponseEntity<Void> delete(@PathVariable final String id) {
 		this.repository.deleteDataById(id);
 		return ResponseEntity.noContent().build();
 	}

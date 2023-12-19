@@ -1,32 +1,36 @@
 package eu.nerdfactor.springutil.generatedexample.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.nerdfactor.springutil.generatedexample.dto.ProductDto;
 import eu.nerdfactor.springutil.generatedexample.entity.ProductEntity;
 import eu.nerdfactor.springutil.generatedexample.repository.ProductRepository;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.test.web.servlet.MockMvc;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(SpringExtension.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class ProductControllerTest {
+@SpringBootTest
+@AutoConfigureMockMvc
+class ProductControllerTest {
 
-	@LocalServerPort
-	private int port;
+	private static final String API_PATH = "/api/products";
 
 	@Autowired
-	RestTemplate restTemplate;
+	MockMvc mockMvc;
+
+	@Autowired
+	ObjectMapper jsonMapper;
 
 	@Autowired
 	ProductRepository repository;
@@ -39,8 +43,7 @@ public class ProductControllerTest {
 	@Autowired
 	GeneratedRestProductController controller;
 
-	@Autowired
-	ModelMapper mapper;
+	ModelMapper mapper = new ModelMapper();
 
 	/**
 	 * Should not be able to load the product because {@link ProductRepository}
@@ -49,21 +52,18 @@ public class ProductControllerTest {
 	 */
 	@Test
 	@WithMockUser(roles = {"UPDATE_PRODUCT"})
-	public void shouldReturn403ErrorLoadingProductWithoutPermission() {
+	void shouldReturn403ErrorLoadingProductWithoutPermission() throws Exception {
 		final ProductEntity product = new ProductEntity();
 		product.setName("Black Vortex");
 		this.repository.save(product);
-		assertThrows(HttpClientErrorException.Forbidden.class, () -> {
-			// The http request does not use the mock user.
-			this.restTemplate.getForEntity(
-					"http://localhost:" + this.port + "/api/products/" + product.getId(),
-					ProductDto.class);
-		});
+		mockMvc.perform(get(API_PATH + "/1"))
+				.andExpect(result -> assertInstanceOf(AccessDeniedException.class, result.getResolvedException()))
+				.andExpect(status().is(HttpStatus.FORBIDDEN.value()));
 	}
 
 	@Test
 	@WithMockUser(roles = {"UPDATE_PRODUCT", "READ_PRODUCT"})
-	public void shouldLoadExistingProduct() {
+	void shouldLoadExistingProduct() {
 		ProductEntity product = new ProductEntity();
 		product.setName("The Casket of Ancient Winters");
 		product = this.repository.save(product);
@@ -74,7 +74,7 @@ public class ProductControllerTest {
 
 	@Test
 	@WithMockUser(roles = {"UPDATE_PRODUCT", "READ_PRODUCT"})
-	public void shouldCreateNewProduct() {
+	void shouldCreateNewProduct() {
 		ProductEntity product = new ProductEntity();
 		product.setName("The Crimson Gem of Cyttorak");
 		HttpEntity<ProductDto> response = this.controller.create(this.mapper.map(product, ProductDto.class));
@@ -86,7 +86,7 @@ public class ProductControllerTest {
 
 	@Test
 	@WithMockUser(roles = {"UPDATE_PRODUCT", "READ_PRODUCT", "DELETE_PRODUCT"})
-	public void shouldDeleteExistingProduct() {
+	void shouldDeleteExistingProduct() {
 		ProductEntity product = new ProductEntity();
 		product.setName("The Darkhold");
 		product = this.repository.save(product);
