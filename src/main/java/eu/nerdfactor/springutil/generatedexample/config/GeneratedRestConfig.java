@@ -1,5 +1,6 @@
 package eu.nerdfactor.springutil.generatedexample.config;
 
+import com.turkraft.springfilter.converter.FilterSpecificationConverterImpl;
 import eu.nerdfactor.springutil.generatedexample.dto.OrderDto;
 import eu.nerdfactor.springutil.generatedexample.entity.Employee;
 import eu.nerdfactor.springutil.generatedexample.entity.OrderModel;
@@ -7,13 +8,11 @@ import eu.nerdfactor.springutil.generatedexample.repository.EmployeeRepository;
 import eu.nerdfactor.springutil.generatedrest.annotation.GeneratedRestConfiguration;
 import eu.nerdfactor.springutil.generatedrest.annotation.GeneratedRestController;
 import eu.nerdfactor.springutil.generatedrest.annotation.GeneratedRestSecurity;
-import eu.nerdfactor.springutil.generatedrest.data.DataAccessService;
-import eu.nerdfactor.springutil.generatedrest.data.DataAccessor;
-import eu.nerdfactor.springutil.generatedrest.data.DataMapper;
-import eu.nerdfactor.springutil.generatedrest.data.DataMerger;
+import eu.nerdfactor.springutil.generatedrest.data.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Component;
 
@@ -32,7 +31,7 @@ import static eu.nerdfactor.springutil.generatedrest.annotation.GeneratedRestCon
  * the full class name to match to the generated controller.
  */
 @Component
-@GeneratedRestConfiguration(indentation = INDENT_SPACE, classNamePattern = "{PREFIX}Rest{NAME_NORMALIZED}Controller")
+@GeneratedRestConfiguration(indentation = INDENT_SPACE, classNamePattern = "{PREFIX}Rest{NAME_NORMALIZED}Controller", log = true)
 @GeneratedRestController(className = "eu.nerdfactor.springutil.generatedexample.controller.OrderController", value = "/api/orders", entity = OrderModel.class, id = Integer.class, dto = OrderDto.class)
 @GeneratedRestSecurity(className = "eu.nerdfactor.springutil.generatedexample.controller.OrderController")
 public class GeneratedRestConfig {
@@ -88,6 +87,27 @@ public class GeneratedRestConfig {
 			public <T> T merge(T t, T t1) {
 				mapper.map(t1, t);
 				return t;
+			}
+		};
+	}
+
+	/**
+	 * Provides a bean of {@link DataSpecificationBuilder} to build {@link Specification Specifications} from a filter
+	 * string.
+	 *
+	 * @param converter A turkraft {@link FilterSpecificationConverterImpl} that will convert the filter string.
+	 * @return A new DataSpecificationBuilder
+	 */
+	@Bean
+	public DataSpecificationBuilder getSpecificationBuilder(@Autowired final FilterSpecificationConverterImpl converter) {
+		return new DataSpecificationBuilder() {
+			@Override
+			public <T> Specification<T> build(String filter, Class<T> cls) {
+				if (filter == null || filter.isBlank()) {
+					return Specification.where(null);
+				} else {
+					return converter.convert(filter);
+				}
 			}
 		};
 	}
