@@ -1,0 +1,177 @@
+{
+  "config": {
+	"exporter": "eu.nerdfactor.springutil.generatedrest.export.JsonConfigExporter",
+	"classNamePrefix": "Generated",
+	"indentation": "    ",
+	"log": "true",
+	"classNamePattern": "{PREFIX}Rest{NAME_NORMALIZED}Controller",
+	"dataWrapper": "java.lang.Object",
+	"dtoNamespace": ""
+  },
+  "controllers": {
+	"GeneratedRestCustomerController": {
+	  "className": "eu.nerdfactor.springutil.generatedexample.customer.GeneratedRestCustomerController",
+	  "request": "/api/customers",
+	  "entity": "eu.nerdfactor.springutil.generatedexample.customer.CustomerDao",
+	  "id": "java.lang.String",
+	  "idAccessor": "getId",
+	  "requestDto": "eu.nerdfactor.springutil.generatedexample.customer.CustomerDto",
+	  "singleDto": "eu.nerdfactor.springutil.generatedexample.customer.CustomerDto",
+	  "listDto": "eu.nerdfactor.springutil.generatedexample.customer.CustomerDto",
+	  "dataAccessorClass": "eu.nerdfactor.springutil.generatedrest.data.DataAccessor<eu.nerdfactor.springutil.generatedexample.customer.CustomerDao, java.lang.String>",
+	  "dataMapperClass": "eu.nerdfactor.springutil.generatedrest.data.DataMapper",
+	  "dataMergerClass": "eu.nerdfactor.springutil.generatedrest.data.DataMerger",
+	  "security": {
+		"className": "eu.nerdfactor.springutil.generatedexample.customer.GeneratedRestCustomerController",
+		"pattern": "ROLE_{METHOD}_{ENTITY}",
+		"inclusive": true
+	  },
+	  "existingRequests": [
+		"DELETE/api/customers/{id}"
+	  ],
+	  "dataWrapperClass": "java.lang.Object",
+	  "relations": {
+		"orders": {
+		  "name": "orders",
+		  "type": "MULTIPLE",
+		  "getter": "getOrders",
+		  "setter": "setOrders",
+		  "adder": "addOrder",
+		  "remover": "removeOrder",
+		  "entityClass": "eu.nerdfactor.springutil.generatedexample.entity.OrderModel",
+		  "dtoClass": "eu.nerdfactor.springutil.generatedexample.dto.OrderDto",
+		  "withDtos": true,
+		  "idClass": "java.lang.Integer",
+		  "idAccessor": "getId"
+		}
+	  }
+	},
+	"GeneratedRestProductController": {
+	  "className": "eu.nerdfactor.springutil.generatedexample.controller.GeneratedRestProductController",
+	  "request": "/api/products",
+	  "entity": "eu.nerdfactor.springutil.generatedexample.entity.ProductEntity",
+	  "id": "java.lang.Integer",
+	  "idAccessor": "getId",
+	  "requestDto": "eu.nerdfactor.springutil.generatedexample.dto.ProductDto",
+	  "singleDto": "eu.nerdfactor.springutil.generatedexample.dto.ProductDto",
+	  "listDto": "eu.nerdfactor.springutil.generatedexample.dto.ProductDto",
+	  "dataAccessorClass": "eu.nerdfactor.springutil.generatedrest.data.DataAccessor<eu.nerdfactor.springutil.generatedexample.entity.ProductEntity, java.lang.Integer>",
+	  "dataMapperClass": "eu.nerdfactor.springutil.generatedrest.data.DataMapper",
+	  "dataMergerClass": "eu.nerdfactor.springutil.generatedrest.data.DataMerger",
+	  "security": null,
+	  "existingRequests": [],
+	  "dataWrapperClass": "java.lang.Object",
+	  "relations": {
+		"orders": {
+		  "name": "orders",
+		  "type": "MULTIPLE",
+		  "getter": "getOrders",
+		  "setter": "setOrders",
+		  "adder": "sendOrder",
+		  "remover": "cancelOrder",
+		  "entityClass": "eu.nerdfactor.springutil.generatedexample.entity.OrderModel",
+		  "dtoClass": "eu.nerdfactor.springutil.generatedexample.dto.OrderDto",
+		  "withDtos": true,
+		  "idClass": "java.lang.Integer",
+		  "idAccessor": "getId"
+		}
+	  }
+	},
+	"GeneratedRestEmployeeController": {
+	  "className": "eu.nerdfactor.springutil.generatedexample.controller.GeneratedRestEmployeeController",
+	  "request": "/api/employee",
+	  "entity": "eu.nerdfactor.springutil.generatedexample.entity.Employee",
+	  "id": "java.lang.Integer",
+	  "idAccessor": "getPerNo",
+	  "requestDto": null,
+	  "singleDto": null,
+	  "listDto": null,
+	  "dataAccessorClass": "eu.nerdfactor.springutil.generatedrest.data.DataAccessor<eu.nerdfactor.springutil.generatedexample.entity.Employee, java.lang.Integer>",
+	  "dataMapperClass": "eu.nerdfactor.springutil.generatedrest.data.DataMapper",
+	  "dataMergerClass": "eu.nerdfactor.springutil.generatedrest.data.DataMerger",
+	  "security": {
+		"className": "eu.nerdfactor.springutil.generatedexample.controller.GeneratedRestEmployeeController",
+		"pattern": "ROLE_{METHOD}_{ENTITY}",
+		"inclusive": false
+	  },
+	  "existingRequests": [],
+	  "dataWrapperClass": "java.lang.Object",
+	  "relations": {
+		"manager": {
+		  "name": "manager",
+		  "type": "SINGLE",
+		  "getter": "getManager",
+		  "setter": "setManager",
+		  "adder": "addManager",
+		  "remover": "removeManager",
+		  "entityClass": "eu.nerdfactor.springutil.generatedexample.entity.Employee",
+		  "dtoClass": null,
+		  "withDtos": false,
+		  "idClass": "java.lang.Integer",
+		  "idAccessor": "getPerNo"
+		},
+		"staff": {
+		  "name": "staff",
+		  "type": "MULTIPLE",
+		  "getter": "getStaff",
+		  "setter": "setStaff",
+		  "adder": "assignEmployee",
+		  "remover": "assignEmployee",
+		  "entityClass": "eu.nerdfactor.springutil.generatedexample.entity.Employee",
+		  "dtoClass": null,
+		  "withDtos": false,
+		  "idClass": "java.lang.Integer",
+		  "idAccessor": "getPerNo"
+		}
+	  }
+	},
+	"OrderController": {
+	  "className": "eu.nerdfactor.springutil.generatedexample.controller.OrderController",
+	  "request": "/api/orders",
+	  "entity": "eu.nerdfactor.springutil.generatedexample.entity.OrderModel",
+	  "id": "java.lang.Integer",
+	  "idAccessor": "getId",
+	  "requestDto": "eu.nerdfactor.springutil.generatedexample.dto.OrderDto",
+	  "singleDto": "eu.nerdfactor.springutil.generatedexample.dto.OrderDto",
+	  "listDto": "eu.nerdfactor.springutil.generatedexample.dto.OrderDto",
+	  "dataAccessorClass": "eu.nerdfactor.springutil.generatedrest.data.DataAccessor<eu.nerdfactor.springutil.generatedexample.entity.OrderModel, java.lang.Integer>",
+	  "dataMapperClass": "eu.nerdfactor.springutil.generatedrest.data.DataMapper",
+	  "dataMergerClass": "eu.nerdfactor.springutil.generatedrest.data.DataMerger",
+	  "security": {
+		"className": "eu.nerdfactor.springutil.generatedexample.controller.OrderController",
+		"pattern": "ROLE_{METHOD}_{ENTITY}",
+		"inclusive": true
+	  },
+	  "existingRequests": [],
+	  "dataWrapperClass": "java.lang.Object",
+	  "relations": {
+		"customer": {
+		  "name": "customer",
+		  "type": "SINGLE",
+		  "getter": "getCustomer",
+		  "setter": "setCustomer",
+		  "adder": "addCustomer",
+		  "remover": "removeCustomer",
+		  "entityClass": "eu.nerdfactor.springutil.generatedexample.customer.CustomerDao",
+		  "dtoClass": "eu.nerdfactor.springutil.generatedexample.customer.CustomerDto",
+		  "withDtos": true,
+		  "idClass": "java.lang.String",
+		  "idAccessor": "getEmail"
+		},
+		"products": {
+		  "name": "products",
+		  "type": "MULTIPLE",
+		  "getter": "getProducts",
+		  "setter": "setProducts",
+		  "adder": "addProduct",
+		  "remover": "removeProduct",
+		  "entityClass": "eu.nerdfactor.springutil.generatedexample.entity.ProductEntity",
+		  "dtoClass": "eu.nerdfactor.springutil.generatedexample.dto.ProductDto",
+		  "withDtos": true,
+		  "idClass": "java.lang.Integer",
+		  "idAccessor": "getId"
+		}
+	  }
+	}
+  }
+}
